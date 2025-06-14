@@ -39,7 +39,7 @@ Each lab typically includes:
 **Generic Setup Instructions:**
 
 ```bash
-git clone https://github.com/yourusername/vulnerable-labs.git
+git clone https://github.com/iamharshkr/vulnerable-labs.git
 cd vulnerable-labs/<Category>/<Lab Name>
 docker-compose up --build
 ```
