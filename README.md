@@ -81,4 +81,4 @@ For suggestions, issues, or collaboration, feel free to open an issue or pull re
 
 ---
 
-Let me know if you’d like a matching [CONTRIBUTING.md](f) or a sample lab template for consistency across labs!
+Let me know if you’d like a matching [CONTRIBUTING.md](CONTRIBUTING.md) or a sample lab template for consistency across labs!
