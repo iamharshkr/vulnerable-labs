@@ -1,0 +1,47 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: sql_injection_lab_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: security_lab
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: sql_injection_lab_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: sql_injection_lab_web
+    restart: always
+    volumes:
+      - ./web:/var/www/html
+    ports:
+      - "8000:80"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: password
+      DB_NAME: security_lab
+
+volumes:
+  mysql_data:

@@ -1,0 +1,60 @@
+services:
+  # PHP Apache Service
+  php-apache:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: securebank-php
+    depends_on:
+      - mysql
+    volumes:
+      - ./:/var/www/html/
+    ports:
+      - "8000:80"
+    networks:
+      - securebank-network
+    environment:
+      - DB_HOST=mysql
+      - DB_NAME=securebank_lab
+      - DB_USER=root
+      - DB_PASSWORD=securebank123
+
+  # MySQL Database Service
+  mysql:
+    image: mysql:8.0
+    container_name: securebank-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: securebank123
+      MYSQL_DATABASE: securebank_lab
+      MYSQL_USER: bankuser
+      MYSQL_PASSWORD: bankpass123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    networks:
+      - securebank-network
+
+  # PHPMyAdmin Service (Optional - for database management)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: securebank-phpmyadmin
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: securebank123
+    ports:
+      - "8081:80"
+    networks:
+      - securebank-network
+
+volumes:
+  mysql_data:
+
+networks:
+  securebank-network:
+    driver: bridge
