@@ -1,0 +1,16 @@
+# 1. Place all files in folder
+# 2. Add database-docker.php on config/
+# 3. Run:
+docker-compose up -d --build
+
+# 4. Access:
+# - Application: http://localhost:8000
+# - phpMyAdmin: http://localhost:8081
+🔑 Access Details:
+Service	URL	Credentials
+TechBlog	http://localhost:8000	admin / password123
+phpMyAdmin	http://localhost:8081	root / rootpassword
+MySQL	localhost:3306	techblog_user / techblog_pass
+
+
+

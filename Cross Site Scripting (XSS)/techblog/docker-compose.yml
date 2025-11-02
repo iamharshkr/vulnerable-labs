@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  mysql:
+    image: mysql:8.0
+    container_name: techblog_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: techblog_db
+      MYSQL_USER: techblog_user
+      MYSQL_PASSWORD: techblog_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db_setup.sql:/docker-entrypoint-initdb.d/db_setup.sql
+    networks:
+      - techblog_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # phpMyAdmin Service
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: techblog_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "9090:80"
+    depends_on:
+      - mysql
+    networks:
+      - techblog_network
+
+  # PHP Apache Web Server
+  web:
+    build: .
+    container_name: techblog_web
+    restart: always
+    ports:
+      - "9000:80"
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - techblog_network
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=techblog_user
+      - DB_PASS=techblog_pass
+      - DB_NAME=techblog_db
+
+networks:
+  techblog_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
