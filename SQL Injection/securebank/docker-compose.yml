@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: securebank_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: bank
+      MYSQL_USER: bank_user
+      MYSQL_PASSWORD: bank_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - bank_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --default-authentication-plugin=mysql_native_password   # Ensures compatibility
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: securebank_pma
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 100M
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - bank_network
+
+  web:
+    build: .
+    container_name: securebank_web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: rootpassword
+      DB_NAME: bank
+    volumes:
+      - ./src:/var/www/html
+    networks:
+      - bank_network
+
+volumes:
+  db_data:
+
+networks:
+  bank_network:
+    driver: bridge
